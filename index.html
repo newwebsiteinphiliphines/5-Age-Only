@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ceb">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Age Verification – 5+</title>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--text:#1d2433;--muted:#667;--ok:#16a34a;--bad:#dc2626;--brand:#4f46e5}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1220;--card:#1a1e33;--text:#eef0ff;--muted:#9aa0c0}}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+.card{background:var(--card);border-radius:20px;padding:24px;max-width:460px;width:100%;box-shadow:0 8px 30px rgba(0,0,0,.12);text-align:center}
+h1{margin:0 0 6px;font-size:1.5rem}
+p{color:var(--muted);margin:6px 0 16px}
+.cam{position:relative;width:100%;aspect-ratio:4/3;background:#000;border-radius:16px;overflow:hidden;display:none}
+video,canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+button{background:var(--brand);color:#fff;border:0;border-radius:12px;padding:14px 22px;font-size:1rem;cursor:pointer;margin-top:14px;width:100%}
+button:disabled{opacity:.5;cursor:wait}
+#status{margin-top:12px;font-weight:600;min-height:1.4em}
+.ok{color:var(--ok)}.bad{color:var(--bad)}
+#site{display:none}
+#site .emoji{font-size:3.5rem}
+</style>
+</head>
+<body>
+<div class="card" id="gate">
+  <h1>🔒 Face Verification</h1>
+  <p>Kini nga website para sa mga <b>5 anyos pataas</b>. I-open ang camera aron ma-check ang imong edad.</p>
+  <div class="cam" id="cam"><video id="video" autoplay muted playsinline></video><canvas id="overlay"></canvas></div>
+  <div id="status">Gi-load pa ang AI model…</div>
+  <button id="btn" disabled>📷 Open Camera</button>
+  <p style="font-size:.8rem;margin-top:14px">Ang video ma-process sa imong device lang. Walay gi-upload o gi-save. Ang edad estimate ra ug dili 100% saktong.</p>
+</div>
+
+<div class="card" id="site">
+  <div class="emoji">🎉</div>
+  <h1>Welcome!</h1>
+  <p>Na-verify ka. Detected age: <b id="finalAge"></b> anyos (estimate).</p>
+  <p>Ibutang diri ang imong website content.</p>
+  <button onclick="location.reload()">Balik sa Verification</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.js"></script>
+<script>
+const MIN_AGE = 5, SAMPLES = 12;
+const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model/';
+const $ = id => document.getElementById(id);
+const video = $('video'), overlay = $('overlay'), btn = $('btn'), status = $('status');
+let ages = [], loop = null, stream = null;
+
+function say(msg, cls=''){ status.textContent = msg; status.className = cls; }
+
+(async () => {
+  try {
+    await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+    await faceapi.nets.ageGenderNet.loadFromUri(MODEL_URL);
+    say('Andam na. Pindota ang Open Camera.');
+    btn.disabled = false;
+  } catch (e) {
+    say('Napakyas ang pag-load sa model. Check ang internet.', 'bad');
+  }
+})();
+
+btn.onclick = async () => {
+  btn.disabled = true; ages = [];
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+  } catch (e) {
+    say('Dili ma-open ang camera. I-allow ang camera permission.', 'bad');
+    btn.disabled = false; return;
+  }
+  video.srcObject = stream;
+  $('cam').style.display = 'block';
+  await video.play();
+  say('Tan-awa ang camera ug ayaw paglihok…');
+  loop = setInterval(detect, 350);
+};
+
+async function detect(){
+  const opts = new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 });
+  const r = await faceapi.detectSingleFace(video, opts).withAgeAndGender();
+  const ctx = overlay.getContext('2d');
+  overlay.width = video.videoWidth; overlay.height = video.videoHeight;
+  ctx.clearRect(0,0,overlay.width,overlay.height);
+  if (!r){ say('Walay nakita nga nawong. Duol sa camera ug pagpakahayag.'); return; }
+  const b = r.detection.box;
+  ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 4; ctx.strokeRect(b.x, b.y, b.width, b.height);
+  ages.push(r.age);
+  say(`Nag-scan… ${ages.length}/${SAMPLES}`);
+  if (ages.length >= SAMPLES) finish();
+}
+
+function finish(){
+  clearInterval(loop);
+  stream.getTracks().forEach(t => t.stop());
+  const sorted = [...ages].sort((a,b)=>a-b);
+  const median = sorted[Math.floor(sorted.length/2)];
+  const age = Math.round(median);
+  if (age >= MIN_AGE){
+    $('finalAge').textContent = age;
+    $('gate').style.display = 'none';
+    $('site').style.display = 'block';
+  } else {
+    $('cam').style.display = 'none';
+    say(`Sorry, ang estimate nimo kay ${age} anyos. Para ra ni sa 5 anyos pataas.`, 'bad');
+    btn.textContent = '🔄 Sulayi Pag-usab'; btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>
