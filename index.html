@@ -3,109 +3,183 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Age Verification – 5+</title>
+<title>Kids Zone 🌈</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f4f6fb;--card:#fff;--text:#1d2433;--muted:#667;--ok:#16a34a;--bad:#dc2626;--brand:#4f46e5}
-@media (prefers-color-scheme:dark){:root{--bg:#0f1220;--card:#1a1e33;--text:#eef0ff;--muted:#9aa0c0}}
+:root{--ink:#3b2a6b;--pink:#ff5fa2;--yellow:#ffd93d;--blue:#4dabf7;--green:#51cf66;--orange:#ff922b}
 *{box-sizing:border-box}
-body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
-.card{background:var(--card);border-radius:20px;padding:24px;max-width:460px;width:100%;box-shadow:0 8px 30px rgba(0,0,0,.12);text-align:center}
-h1{margin:0 0 6px;font-size:1.5rem}
-p{color:var(--muted);margin:6px 0 16px}
-.cam{position:relative;width:100%;aspect-ratio:4/3;background:#000;border-radius:16px;overflow:hidden;display:none}
-video,canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
-button{background:var(--brand);color:#fff;border:0;border-radius:12px;padding:14px 22px;font-size:1rem;cursor:pointer;margin-top:14px;width:100%}
-button:disabled{opacity:.5;cursor:wait}
-#status{margin-top:12px;font-weight:600;min-height:1.4em}
-.ok{color:var(--ok)}.bad{color:var(--bad)}
-#site{display:none}
-#site .emoji{font-size:3.5rem}
+body{margin:0;min-height:100vh;font-family:'Fredoka','Comic Sans MS',system-ui,sans-serif;color:var(--ink);
+ background:linear-gradient(180deg,#bde7ff 0%,#fff3b0 100%);display:flex;align-items:center;justify-content:center;padding:16px;overflow-x:hidden}
+.deco{position:fixed;font-size:2.4rem;animation:float 4s ease-in-out infinite;pointer-events:none;opacity:.9}
+@keyframes float{50%{transform:translateY(-16px) rotate(8deg)}}
+.card{position:relative;background:#fff;border:6px solid var(--yellow);border-radius:32px;padding:22px;max-width:460px;width:100%;
+ text-align:center;box-shadow:0 10px 0 var(--orange),0 18px 30px rgba(0,0,0,.15)}
+.mascot{font-size:4rem;animation:bounce 1.6s infinite}
+@keyframes bounce{50%{transform:translateY(-10px)}}
+h1{margin:4px 0;font-size:2rem;color:var(--pink)}
+p{margin:6px 0 12px;font-size:1.05rem}
+.cam{position:relative;width:min(100%,300px);aspect-ratio:1;margin:14px auto 24px;display:none}
+.circle{position:absolute;inset:0;border-radius:50%;overflow:hidden;background:#000;border:6px solid #fff;box-shadow:0 0 0 6px var(--blue);transition:box-shadow .3s}
+video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+.ring{position:absolute;inset:-18px;border-radius:50%;border:5px dashed var(--blue);animation:spin 10s linear infinite;pointer-events:none}
+.ring::after{content:"⭐";position:absolute;top:-16px;left:calc(50% - 12px);font-size:1.5rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sweep{position:absolute;left:0;right:0;top:-70px;height:70px;display:none;pointer-events:none;
+ background:linear-gradient(180deg,transparent,rgba(81,207,102,.7));border-bottom:4px solid #d3f9d8}
+@keyframes sweep{to{top:100%}}
+.cam.scanning .circle{box-shadow:0 0 0 6px var(--green),0 0 34px 10px rgba(81,207,102,.65)}
+.cam.scanning .ring{border-style:solid;border-color:var(--green) var(--yellow) var(--green) var(--yellow);animation-duration:1.1s}
+.cam.scanning .sweep{display:block;animation:sweep 1.3s ease-in-out infinite alternate}
+.bar{height:22px;background:#eee;border-radius:99px;margin-top:12px;overflow:hidden;display:none;border:3px solid var(--ink)}
+.bar div{height:100%;width:0;background:linear-gradient(90deg,var(--green),var(--yellow));transition:width .3s}
+#status{margin-top:12px;font-weight:700;font-size:1.1rem;min-height:1.6em}
+.ok{color:#2b9a3f}.bad{color:#e03131}
+button{font-family:inherit;font-weight:700;font-size:1.25rem;color:#fff;background:var(--pink);border:0;border-radius:99px;padding:14px 26px;
+ margin-top:14px;width:100%;cursor:pointer;box-shadow:0 6px 0 #c9387a;transition:transform .1s}
+button:active{transform:translateY(5px);box-shadow:0 1px 0 #c9387a}
+button:disabled{opacity:.55;cursor:wait}
+button.green{background:var(--green);box-shadow:0 6px 0 #2b9a3f}
+button.gray{background:#adb5bd;box-shadow:0 6px 0 #868e96}
+.hide{display:none}
+.tiny{font-size:.78rem;opacity:.75;margin-top:14px}
+.games{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:14px}
+.games div{background:var(--yellow);border-radius:20px;padding:16px;font-size:1.1rem;font-weight:700}
+.games div span{display:block;font-size:2.4rem}
+.games div:nth-child(2){background:#a5d8ff}.games div:nth-child(3){background:#b2f2bb}.games div:nth-child(4){background:#ffc9de}
 </style>
 </head>
 <body>
+<span class="deco" style="top:6%;left:6%">⭐</span>
+<span class="deco" style="top:12%;right:8%;animation-delay:1s">🌈</span>
+<span class="deco" style="bottom:10%;left:8%;animation-delay:2s">🎈</span>
+<span class="deco" style="bottom:8%;right:6%;animation-delay:.5s">🦋</span>
+
 <div class="card" id="gate">
-  <h1>🔒 Face Verification</h1>
-  <p>Kini nga website para sa mga <b>5 anyos pataas</b>. I-open ang camera aron ma-check ang imong edad.</p>
-  <div class="cam" id="cam"><video id="video" autoplay muted playsinline></video><canvas id="overlay"></canvas></div>
-  <div id="status">Gi-load pa ang AI model…</div>
-  <button id="btn" disabled>📷 Open Camera</button>
-  <p style="font-size:.8rem;margin-top:14px">Ang video ma-process sa imong device lang. Walay gi-upload o gi-save. Ang edad estimate ra ug dili 100% saktong.</p>
+  <div class="mascot">🐻</div>
+  <h1>Kids Zone!</h1>
+  <p>Para ni sa mga <b>5 anyos pataas</b>! Ipakita ang imong nawong sa camera aron makasulod ka. 😊</p>
+  <div class="cam" id="cam">
+    <div class="circle"><video id="video" autoplay muted playsinline></video><div class="sweep"></div></div>
+    <div class="ring"></div>
+  </div>
+  <div class="bar" id="bar"><div id="fill"></div></div>
+  <div id="status">Gi-andam pa ang magic… ✨</div>
+  <button id="btn" disabled>📷 Ablihi ang Camera</button>
+
+  <div id="parent" class="hide">
+    <p>Dili kami sigurado sa edad. Mangayo sa <b>Mama, Papa, o Guardian</b> aron mo-confirm. 👨‍👩‍👧</p>
+    <button class="green" id="parentOk">✅ Ako ang parent, 5+ na ang bata</button>
+    <button class="gray" id="retry">🔄 Sulayi Pag-usab</button>
+  </div>
+  <p class="tiny">🔒 Ang camera ma-process sa imong device lang. Walay gi-save o gi-upload. Estimate ra ang edad ug mahimong sayop.</p>
 </div>
 
-<div class="card" id="site">
-  <div class="emoji">🎉</div>
-  <h1>Welcome!</h1>
-  <p>Na-verify ka. Detected age: <b id="finalAge"></b> anyos (estimate).</p>
-  <p>Ibutang diri ang imong website content.</p>
-  <button onclick="location.reload()">Balik sa Verification</button>
+<div class="card hide" id="site">
+  <div class="mascot">🎉</div>
+  <h1>Welcome, Friend!</h1>
+  <p id="welcomeMsg"></p>
+  <div class="games">
+    <div><span>🎨</span>Drawing</div>
+    <div><span>🧩</span>Puzzles</div>
+    <div><span>🎵</span>Songs</div>
+    <div><span>📚</span>Stories</div>
+  </div>
+  <button class="gray" onclick="location.reload()">⬅️ Balik</button>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.js"></script>
 <script>
-const MIN_AGE = 5, SAMPLES = 12;
+const MIN_AGE = 5;       // minimum nga edad
+const SAFE_AGE = 7;      // kung 7+ ang estimate, diretso pasa
+const DENY_BELOW = 3;    // ubos sani, dili gyud makasulod
+const SAMPLES = 25;      // gidaghanon sa good frames
 const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model/';
 const $ = id => document.getElementById(id);
-const video = $('video'), overlay = $('overlay'), btn = $('btn'), status = $('status');
-let ages = [], loop = null, stream = null;
+const video=$('video'), cam=$('cam'), btn=$('btn'), statusEl=$('status');
+const setScan=on=>cam.classList.toggle('scanning',on);
+let ages=[], loop=null, stream=null, busy=false;
+const probe = document.createElement('canvas'); probe.width = 64; probe.height = 48;
 
-function say(msg, cls=''){ status.textContent = msg; status.className = cls; }
+const say=(m,c='')=>{statusEl.textContent=m;statusEl.className=c;};
 
-(async () => {
-  try {
-    await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+(async()=>{
+  try{
+    await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL);   // mas tukma nga detector
     await faceapi.nets.ageGenderNet.loadFromUri(MODEL_URL);
-    say('Andam na. Pindota ang Open Camera.');
-    btn.disabled = false;
-  } catch (e) {
-    say('Napakyas ang pag-load sa model. Check ang internet.', 'bad');
-  }
+    say('Andam na ta! 🚀'); btn.disabled=false;
+  }catch(e){ say('Napakyas ang pag-load. Check ang internet. 😢','bad'); }
 })();
 
-btn.onclick = async () => {
-  btn.disabled = true; ages = [];
-  try {
-    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
-  } catch (e) {
-    say('Dili ma-open ang camera. I-allow ang camera permission.', 'bad');
-    btn.disabled = false; return;
-  }
-  video.srcObject = stream;
-  $('cam').style.display = 'block';
-  await video.play();
-  say('Tan-awa ang camera ug ayaw paglihok…');
-  loop = setInterval(detect, 350);
+btn.onclick=async()=>{
+  btn.classList.add('hide'); ages=[]; $('fill').style.width='0';
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640},height:{ideal:480}},audio:false});
+  }catch(e){ say('I-allow ang camera permission palihog. 🙏','bad'); btn.classList.remove('hide'); return; }
+  video.srcObject=stream; $('cam').style.display='block'; $('bar').style.display='block';
+  await video.play(); say('Tan-awa ang camera ug ayaw paglihok! 👀');
+  loop=setInterval(detect,300);
 };
 
+function brightness(){
+  const c=probe.getContext('2d',{willReadFrequently:true});
+  c.drawImage(video,0,0,64,48);
+  const d=c.getImageData(0,0,64,48).data; let s=0;
+  for(let i=0;i<d.length;i+=4) s+=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
+  return s/(d.length/4);
+}
+
 async function detect(){
-  const opts = new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 });
-  const r = await faceapi.detectSingleFace(video, opts).withAgeAndGender();
-  const ctx = overlay.getContext('2d');
-  overlay.width = video.videoWidth; overlay.height = video.videoHeight;
-  ctx.clearRect(0,0,overlay.width,overlay.height);
-  if (!r){ say('Walay nakita nga nawong. Duol sa camera ug pagpakahayag.'); return; }
-  const b = r.detection.box;
-  ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 4; ctx.strokeRect(b.x, b.y, b.width, b.height);
-  ages.push(r.age);
-  say(`Nag-scan… ${ages.length}/${SAMPLES}`);
-  if (ages.length >= SAMPLES) finish();
+  if(busy||!video.videoWidth) return; busy=true;
+  try{
+    setScan(false);
+    const br=brightness();
+    if(br<60){ say('Ngitngit kaayo! Pangita ug suga 💡'); return; }
+    if(br>215){ say('Hayag kaayo! Likayi ang direkta nga suga ☀️'); return; }
+
+    const r=await faceapi.detectSingleFace(video,new faceapi.SsdMobilenetv1Options({minConfidence:0.6})).withAgeAndGender();
+    if(!r){ say('Wala ko makita imong nawong 🙈'); return; }
+    // Ang makita sa circle kay center square sa video
+    const vw=video.videoWidth, vh=video.videoHeight, side=Math.min(vw,vh);
+    const b=r.detection.box;
+    const fx=(b.x+b.width/2-(vw-side)/2)/side;   // 0..1 sulod sa circle
+    const fy=(b.y+b.height/2-(vh-side)/2)/side;
+    const dist=Math.hypot(fx-0.5,fy-0.5);
+    const size=b.width/side;
+    if(size<0.32){ say('Duol pa sa camera! 🔍'); return; }
+    if(size>0.8){ say('Layo-layo gamay! 🙆'); return; }
+    if(dist>0.18){ say('Ibutang ang nawong sulod sa circle ⭕'); return; }
+
+    setScan(true);
+    ages.push(r.age);
+    $('fill').style.width=Math.round(ages.length/SAMPLES*100)+'%';
+    say(`Nag-scan… ${ages.length}/${SAMPLES} ⭐`);
+    if(ages.length>=SAMPLES) finish();
+  }finally{ busy=false; }
 }
 
 function finish(){
-  clearInterval(loop);
-  stream.getTracks().forEach(t => t.stop());
-  const sorted = [...ages].sort((a,b)=>a-b);
-  const median = sorted[Math.floor(sorted.length/2)];
-  const age = Math.round(median);
-  if (age >= MIN_AGE){
-    $('finalAge').textContent = age;
-    $('gate').style.display = 'none';
-    $('site').style.display = 'block';
-  } else {
-    $('cam').style.display = 'none';
-    say(`Sorry, ang estimate nimo kay ${age} anyos. Para ra ni sa 5 anyos pataas.`, 'bad');
-    btn.textContent = '🔄 Sulayi Pag-usab'; btn.disabled = false;
+  clearInterval(loop); setScan(false); stream.getTracks().forEach(t=>t.stop());
+  const s=[...ages].sort((a,b)=>a-b);
+  const trimmed=s.slice(Math.floor(s.length*.2),Math.ceil(s.length*.8)); // tangtangon ang extremes
+  const age=Math.round(trimmed.reduce((a,b)=>a+b,0)/trimmed.length);
+  $('cam').style.display='none'; $('bar').style.display='none';
+
+  if(age>=SAFE_AGE) return allow(age);
+  if(age>=DENY_BELOW){
+    say('Hmm, dili kami sigurado sa edad. 🤔'); $('parent').classList.remove('hide');
+  }else{
+    say('Sorry friend, para ra ni sa 5 anyos pataas. 🧸','bad');
+    $('parent').classList.remove('hide'); $('parentOk').classList.add('hide');
   }
 }
+
+function allow(age,byParent){
+  $('welcomeMsg').textContent = byParent ? 'Gi-confirm sa parent! Enjoy! 🎈'
+    : `Na-verify ka na! (estimate: ~${age} anyos) Enjoy! 🎈`;
+  $('gate').classList.add('hide'); $('site').classList.remove('hide');
+}
+$('parentOk').onclick=()=>allow(null,true);
+$('retry').onclick=()=>location.reload();
 </script>
 </body>
 </html>
